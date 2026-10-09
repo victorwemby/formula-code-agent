@@ -1,0 +1,15 @@
+﻿.python-env/
+node_modules/
+.env
+*.log
+
+.python-env/
+.python-packages-v2/
+node_modules/
+
+.python-env/
+.python-packages/
+.python-packages-v2/
+node_modules/
+__pycache__/
+*.pyc

@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "formula-code-agent": {
+      "command": "node",
+      "args": ["H:\\111\\formula-code-agent\\mcp-server.js"],
+      "env": {
+        "AI_PROVIDER": "open-source",
+        "OLLAMA_BASE_URL": "http://127.0.0.1:11434",
+        "VISION_MODEL": "qwen2.5vl:7b",
+        "CODE_MODEL": "qwen2.5-coder:7b",
+        "MODEL_TIMEOUT_MS": "120000"
+      }
+    },
+    "formula-code-agent-mock": {
+      "command": "node",
+      "args": ["H:\\111\\formula-code-agent\\mcp-server.js"],
+      "env": {
+        "AI_PROVIDER": "mock"
+      }
+    }
+  }
+}

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formula Code Agent</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <header class="panel-header">
+      <div class="brand-mark">ƒ</div>
+      <div>
+        <strong>Formula Code Agent</strong>
+        <span><i id="statusDot"></i><span id="statusText">连接 Agent...</span></span>
+      </div>
+      <button id="settingsButton" class="icon-button" type="button" aria-label="设置">•••</button>
+    </header>
+
+    <main>
+      <section class="source-card">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-mode="latex" type="button" role="tab" aria-selected="true">LaTeX</button>
+          <button class="tab" data-mode="image" type="button" role="tab" aria-selected="false">公式图片</button>
+          <button id="readSelectionButton" class="read-selection" type="button">读取当前选区</button>
+        </div>
+
+        <div id="latexPanel" class="source-panel">
+          <textarea id="latexInput" rows="6" spellcheck="false" placeholder="选中网页中的 LaTeX，或在这里粘贴源码"></textarea>
+          <div id="sourceInfo" class="source-info" hidden></div>
+        </div>
+
+        <div id="imagePanel" class="source-panel" hidden>
+          <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+          <button id="uploadButton" class="upload-button" type="button">
+            <span>↥</span>
+            <span><strong>上传公式图片</strong><small>PNG、JPG、WebP，最大 8 MB</small></span>
+          </button>
+          <div id="imagePreview" class="image-preview" hidden>
+            <img id="previewImage" alt="公式图片预览" />
+            <div><strong id="imageName"></strong><small id="imageMeta"></small></div>
+            <button id="removeImageButton" type="button" aria-label="移除图片">×</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="request-card">
+        <label for="promptInput">转换要求</label>
+        <textarea id="promptInput" rows="3">请转换为可运行的 Python 代码，并添加必要注释</textarea>
+        <div class="request-options">
+          <label for="librarySelect">输出方式</label>
+          <select id="librarySelect">
+            <option>SymPy</option>
+            <option>NumPy</option>
+            <option>纯 Python</option>
+          </select>
+        </div>
+        <button id="convertButton" class="convert-button" type="button"><span>转换为 Python</span><b>→</b></button>
+      </section>
+
+      <section id="resultSection" class="result-section" hidden>
+        <div class="result-heading">
+          <div><small>AGENT RESULT</small><h1>转换完成</h1></div>
+          <span id="confidenceBadge">100%</span>
+        </div>
+
+        <div class="recognized">
+          <label>识别出的 LaTeX</label>
+          <code id="recognizedLatex"></code>
+        </div>
+
+        <div class="code-card">
+          <div class="code-head"><span>PYTHON</span><button id="copyButton" type="button">复制</button></div>
+          <pre><code id="pythonCode"></code></pre>
+        </div>
+
+        <p id="explanation" class="explanation"></p>
+        <div id="dependencies" class="dependencies"></div>
+        <div id="warnings"></div>
+        <div id="trace" class="trace"></div>
+      </section>
+
+      <section id="emptyState" class="empty-state">
+        <span>⌁</span>
+        <p>选中网页中的 LaTeX 后点击悬浮按钮，转换结果会显示在这里。</p>
+      </section>
+    </main>
+
+    <dialog id="settingsDialog">
+      <form method="dialog">
+        <div class="dialog-head"><strong>Agent 设置</strong><button value="cancel" type="submit">×</button></div>
+        <label for="serverUrlInput">后端服务地址</label>
+        <input id="serverUrlInput" type="url" value="http://127.0.0.1:4173" />
+        <p>扩展复用网页版的 Agent 后端。修改后会自动检查连接。</p>
+        <button id="saveSettingsButton" class="save-button" value="default" type="submit">保存设置</button>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>
+

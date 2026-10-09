@@ -1,0 +1,43 @@
+
+> formula-code-agent@0.1.0 test
+> node --test tests/*.test.js
+
+✔ 复杂复变公式会决策为符号计算并跳过强制数值执行 (2635.8509ms)
+✔ 会话保存公式、消息、代码版本和目标库 (0.7792ms)
+✔ 非代码问题走自由聊天回答而不生成 Python (0.3578ms)
+✔ 首次自由对话无需提供 LaTeX 或图片 (0.2078ms)
+✔ 推导、比较和变量替换不会误进入代码生成流程 (0.2167ms)
+✔ 当前公式的自由追问仍保持聊天输入，不会伪装成 LaTeX (0.1213ms)
+✔ 引用历史消息会连同新问题传给聊天模型 (0.2593ms)
+✔ Mock 聊天回答会明确使用引用材料 (0.1138ms)
+✔ 引用代码并要求加入注释时进入代码修改流程 (1053.3667ms)
+✔ 自由对话中的 LaTeX 转代码请求会提取公式 (1469.1879ms)
+✔ LaTeX 输入会生成结构化的 SymPy 结果 (2189.6572ms)
+✔ 缺失 LaTeX 时返回可读的校验错误 (0.4342ms)
+✔ 图片输入通过识别和生成两个阶段 (121.2565ms)
+✔ 二次方程会生成与输入公式一致的三种代码版本 (6277.7416ms)
+✔ 二次方程会覆盖模型返回的不完整代码并实际执行 (4261.3322ms)
+✔ 代码预检会识别 SymPy 无穷求和的常见错误 (307.501ms)
+✔ SymPy 无穷级数会跳过本机实际执行 (0.0671ms)
+✔ 目标库选项会校验实际导入和混用情况 (2073.7445ms)
+✔ 数学一致性检查会拦截缺失二次方程核心计算的代码 (232.0584ms)
+✔ NumPy 数值积分可搭配 SciPy，但不能混用 SymPy (1488.17ms)
+✔ 真实 Provider 可用时，预检失败会触发一次修正 (1010.8927ms)
+✔ 数学结果错误即使能运行，也会触发模型纠错 (9707.8261ms)
+✔ 执行失败会反馈给 Provider 并用修正代码复验 (2277.2524ms)
+✔ MCP initialize 和 tools/list 会返回已注册的数学公式工具 (0.7008ms)
+✔ MCP formula_agent 可以复用现有 Agent 完成自由对话 (1.1814ms)
+✔ MCP 通知不会产生响应 (0.0802ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35225.9576
+npm notice
+npm notice New major version of npm available! 11.17.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Formula Code Agent",
+  "version": "0.1.0",
+  "description": "在 Overleaf 和其他网页中将 LaTeX 或公式图片转换为 Python 代码。",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "sidePanel",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_title": "打开 Formula Code Agent"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
+      "css": ["content-script.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

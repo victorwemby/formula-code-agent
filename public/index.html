@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="将数学公式图片或 LaTeX 源码转换为可运行的 Python 代码" />
+    <title>Formula Code Agent</title>
+    <link rel="stylesheet" href="/styles.css?v=3" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#" aria-label="Formula Code Agent 首页">
+          <span class="brand-mark">ƒ</span>
+          <span><strong>Formula</strong><small>Code Agent</small></span>
+        </a>
+
+        <button class="new-chat" id="newChatButton" type="button">
+          <span>＋</span> 新建转换
+        </button>
+
+        <nav class="tool-nav" aria-label="工具导航">
+          <p class="nav-label">AI 工具</p>
+          <button class="tool-item active" type="button">
+            <span class="tool-icon">⌁</span>
+            <span><strong>公式转 Python</strong><small>图片 / LaTeX</small></span>
+            <span class="status-dot" title="可用"></span>
+          </button>
+          <button class="tool-item muted" type="button" disabled>
+            <span class="tool-icon">∑</span>
+            <span><strong>公式解释器</strong><small>即将推出</small></span>
+          </button>
+        </nav>
+
+        <div class="sidebar-spacer"></div>
+
+        <div class="model-card">
+          <div class="model-card-top"><span class="pulse"></span><span id="providerName">连接中...</span></div>
+          <strong id="providerMode">模型状态</strong>
+          <p>模型层可替换，不影响 Agent 流程</p>
+        </div>
+
+        <button class="profile" type="button">
+          <span class="avatar">研</span>
+          <span><strong>研究工作台</strong><small>本地原型</small></span>
+          <span>···</span>
+        </button>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <div class="eyebrow"><span class="live-dot"></span> AGENT WORKSPACE</div>
+            <h1>公式转 Python</h1>
+          </div>
+          <div class="top-actions">
+            <button class="ghost-button" id="settingsButton" type="button">模型设置</button>
+            <button class="ghost-button" id="clearButton" type="button">清空对话</button>
+            <span class="mock-badge" id="modelBadge">MOCK MODE</span>
+          </div>
+        </header>
+
+        <section class="conversation" id="conversation" aria-live="polite">
+          <div class="welcome" id="welcomePanel">
+            <div class="welcome-orbit"><span>ƒ(x)</span></div>
+            <p class="overline">FORMULA INTELLIGENCE</p>
+            <h2>让数学公式，直接成为代码。</h2>
+            <p class="welcome-copy">上传公式图片或粘贴 LaTeX，Agent 将完成识别、解析、代码生成与结果检查。</p>
+            <div class="capabilities">
+              <span>图片公式识别</span><i></i><span>LaTeX 解析</span><i></i><span>Python 生成</span><i></i><span>代码检查</span>
+            </div>
+          </div>
+
+          <div class="messages" id="messages"></div>
+        </section>
+
+        <section class="composer-wrap">
+          <div class="input-card">
+            <div class="input-tabs" role="tablist">
+              <button class="input-tab active" data-mode="chat" type="button" role="tab" aria-selected="true">自由对话</button>
+              <button class="input-tab" data-mode="latex" type="button" role="tab" aria-selected="false">LaTeX 输入</button>
+              <button class="input-tab" data-mode="image" type="button" role="tab" aria-selected="false">图片公式</button>
+              <div class="library-select-wrap">
+                <label for="librarySelect">实现方式</label>
+                <select id="librarySelect" title="选择生成 Python 代码使用的库">
+                  <option value="SymPy">SymPy（符号计算）</option>
+                  <option value="NumPy">NumPy（数值计算）</option>
+                  <option value="纯 Python">纯 Python（标准库）</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="source-panel latex-panel" id="latexPanel" hidden>
+              <label class="source-label" for="latexInput">LaTeX 源码</label>
+              <textarea id="latexInput" rows="3" placeholder="请输入要转换的 LaTeX 码，例如：\\sum_{n=1}^{\\infty}\\frac{1}{n^2}"></textarea>
+              <small class="source-hint">可直接粘贴公式源码；下方输入框可补充转换、解释或实现要求。</small>
+            </div>
+
+            <div class="source-panel" id="imagePanel">
+              <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+              <button class="upload-zone" id="uploadZone" type="button">
+                <span class="upload-icon">↥</span>
+                <span><strong>上传公式图片</strong><small>点击选择或拖拽 PNG、JPG、WebP，最大 8 MB</small></span>
+              </button>
+              <div class="image-preview" id="imagePreview" hidden>
+                <img id="previewImage" alt="待转换的公式图片" />
+                <div><strong id="imageName"></strong><small id="imageMeta"></small></div>
+                <button id="removeImage" type="button" aria-label="移除图片">×</button>
+              </div>
+            </div>
+
+            <div class="conversation-context" id="conversationContext" hidden>
+              <span>已保存公式上下文</span><code id="currentFormula"></code><button id="changeFormulaButton" type="button">新公式</button>
+            </div>
+
+            <div class="quote-context" id="quoteContext" hidden>
+              <span>引用历史消息</span><p id="quotePreview"></p><button id="clearQuoteButton" type="button" aria-label="取消引用">×</button>
+            </div>
+
+            <div class="prompt-row" id="promptRow">
+              <textarea id="promptInput" rows="1" placeholder="输入任何数学或代码问题"></textarea>
+              <button class="send-button" id="sendButton" type="button" aria-label="发送转换请求">
+                <span>↑</span>
+              </button>
+            </div>
+            <div class="composer-foot">
+              <span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 发送</span>
+              <span>AI 生成内容可能存在误差，请核对关键公式</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+    <dialog class="settings-dialog" id="settingsDialog">
+      <form method="dialog" id="settingsForm">
+        <div class="settings-head"><div><h2>模型设置</h2><p>网页与 Agent 使用同一套模型配置</p></div><button type="button" class="dialog-close" id="closeSettingsButton" aria-label="关闭">×</button></div>
+        <label>Provider<select id="providerSelect"><option value="mock">Mock Provider（演示）</option><option value="open-source">Ollama（开源模型）</option></select></label>
+        <label>模型名称<input id="modelNameInput" placeholder="例如：本地 Qwen 7B" /></label>
+        <label>服务地址<input id="baseUrlInput" value="http://127.0.0.1:11434" /></label>
+        <div class="settings-grid"><label>视觉模型<input id="visionModelInput" value="qwen2.5vl:7b" /></label><label>代码模型<input id="codeModelInput" value="qwen2.5-coder:7b" /></label></div>
+        <p class="settings-status" id="settingsStatus"></p>
+        <div class="settings-actions"><button type="button" class="ghost-button" id="cancelSettingsButton">取消</button><button type="submit" class="settings-save" id="saveSettingsButton">保存并检查</button></div>
+      </form>
+    </dialog>
+    <script src="/app.js?v=9"></script>
+  </body>
+</html>
