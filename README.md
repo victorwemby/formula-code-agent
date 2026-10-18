@@ -22,13 +22,15 @@ The mock provider uses a demonstration formula for images and predefined impleme
 
 ## Quick start
 
-Install Node.js 18 or later. No third-party npm dependencies or frontend build are currently required. From the project root:
+Install Node.js 18 or later. No third-party npm dependencies or frontend build are currently required. From the project root, run this command in Windows PowerShell:
 
 ```powershell
-npm start
+npm.cmd start
 ```
 
-Open [http://127.0.0.1:4173](http://127.0.0.1:4173). The provider defaults to `mock` unless `AI_PROVIDER` is already set. Windows users can also run `.\start.ps1`; install Node.js on `PATH` because its bundled-runtime fallback is machine-specific.
+Using `npm.cmd` avoids PowerShell blocking `npm.ps1` with a script execution policy error; no execution policy change is needed. You can also start the server directly with `node server.js`. On Linux/macOS, use `npm start`.
+
+Open [http://127.0.0.1:4173](http://127.0.0.1:4173) and keep the server terminal open. The provider defaults to `mock` unless `AI_PROVIDER` is already set.
 
 ### Python execution
 
@@ -79,7 +81,7 @@ The extension shares the backend provider and defaults to `http://127.0.0.1:4173
 The stdio MCP server reuses `FormulaAgent` through the `formula_agent` tool. It supports formulas, conversation, generation, validation, execution, corrections, and session context independently of the HTTP server.
 
 ```powershell
-npm run mcp
+npm.cmd run mcp
 ```
 
 Use [mcp-config.example.json](mcp-config.example.json) as a client configuration example, replacing its absolute paths with your own. It registers `formula-code-agent` for Ollama and `formula-code-agent-mock` for demonstrations. Restart the MCP client after updating its configuration.
@@ -140,8 +142,8 @@ Web interface / extension     MCP client
 ## Tests and deployment
 
 ```powershell
-npm test
-npm run verify
+npm.cmd test
+npm.cmd run verify
 ```
 
 The deployment check probes Python dependencies and the Ollama model-list endpoint. It reports failure if either check fails, even when mock web mode remains usable.
