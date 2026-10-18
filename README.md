@@ -18,7 +18,7 @@ The mock provider uses a demonstration formula for images and predefined impleme
 
 ## Demonstration
 
-> **Please refer to the demonstration images in the project's `demonstration image` folder.**
+> **Please refer to the demonstration images in the project's `demonstration images` folder.**
 
 ## Quick start
 

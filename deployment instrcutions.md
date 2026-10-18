@@ -17,7 +17,7 @@ formula-code-agent/
 |-- src/agent/               Orchestration, strategies, sessions, validation, execution
 |-- src/providers/           Mock and Ollama providers
 |-- tests/                   Automated tests
-|-- demonstration image/     Example screenshots and formula input
+|-- demonstration images/    Example screenshots and formula input
 |-- server.js                HTTP server entry point
 |-- mcp-server.js            stdio MCP server
 |-- mcp-config.example.json  Example MCP client configuration
