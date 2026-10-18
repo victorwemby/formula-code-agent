@@ -42,6 +42,11 @@ class FormulaAgent {
         prompt: normalized.prompt,
         targetLibrary: normalized.targetLibrary,
       });
+      // The agent decides the implementation library from the formula and
+      // request. Explicit API choices are preserved for backwards
+      // compatibility, while `auto` is resolved here before any generation
+      // or validation happens.
+      normalized.targetLibrary = computationStrategy.recommendedLibrary;
       const template = input.conversation?.formula || quotedText ? null : getFormulaTemplate(recognized.latex, normalized.targetLibrary);
       const templateApplied = Boolean(template);
       let generated = template || await this.generatePython({
@@ -287,9 +292,9 @@ class FormulaAgent {
   validateAndNormalize(input = {}) {
     const inputType = ["latex", "image", "chat"].includes(input.inputType) ? input.inputType : "chat";
     const prompt = String(input.prompt || "").trim();
-    const targetLibrary = ["SymPy", "NumPy", "纯 Python"].includes(input.targetLibrary)
+    const targetLibrary = ["SymPy", "NumPy", "纯 Python", "auto"].includes(input.targetLibrary)
       ? input.targetLibrary
-      : "SymPy";
+      : "auto";
 
     if (inputType === "chat") {
       if (!prompt) throw Object.assign(new Error("请输入你的问题"), { statusCode: 400 });

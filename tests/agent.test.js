@@ -7,6 +7,16 @@ const { ConversationStore, extractVariableConstraints } = require("../src/agent/
 const { needsSafetySkip } = require("../src/agent/python-runner");
 const { decideComputationStrategy } = require("../src/agent/computation-strategy");
 
+test("有限区间且无自由参数的定积分自动使用数值计算", () => {
+  const strategy = decideComputationStrategy({
+    latex: String.raw`\int_{0}^{\pi}\frac{e^{-x/2}\sin^2(x)}{1+x^2}\,dx`,
+    prompt: "转换为 Python 代码",
+    targetLibrary: "auto",
+  });
+  assert.equal(strategy.mode, "numeric");
+  assert.equal(strategy.recommendedLibrary, "NumPy");
+});
+
 test("复杂复变公式会决策为符号计算并跳过强制数值执行", async () => {
   const latex = String.raw`\oint_{\Gamma}\frac{e^{z\zeta}}{(\zeta-\alpha)^2}\,d\zeta`;
   const strategy = decideComputationStrategy({ latex, prompt: "转换为 Python 代码", targetLibrary: "SymPy" });
@@ -281,6 +291,16 @@ test("数学一致性检查会拦截缺失二次方程核心计算的代码", ()
 test("NumPy 数值积分可搭配 SciPy，但不能混用 SymPy", () => {
   const code = "import numpy as np\nfrom scipy.integrate import quad\nprint(quad(lambda x: x**2, 0, 1)[0])";
   assert.equal(validateGeneratedPython(code, ["numpy", "scipy"], "NumPy").passed, true);
+});
+
+test("代码预检会拦截 SymPy 模块名与别名混用", () => {
+  const result = validateGeneratedPython(
+    "import sympy as sp\nprint(sympy.oo)",
+    ["sympy"],
+    "SymPy"
+  );
+  assert.equal(result.passed, false);
+  assert.match(result.errors.join("；"), /sympy\.\*|统一使用/);
 });
 
 test("真实 Provider 可用时，预检失败会触发一次修正", async () => {

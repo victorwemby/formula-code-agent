@@ -155,7 +155,10 @@ const server = http.createServer(async (req, res) => {
       const input = await readJson(req);
       const session = conversations.getOrCreate(input.sessionId);
       const conversation = conversations.toContext(session);
-      const effectiveInput = { ...input, conversation };
+      // The web UI is agent-driven: never let a stale client or an old
+      // session pin the implementation library. API integrations can still
+      // call FormulaAgent directly with an explicit library when needed.
+      const effectiveInput = { ...input, targetLibrary: "auto", conversation };
       const result = await agent.run(effectiveInput);
       conversations.record(session, { input: effectiveInput, result });
       result.session = {

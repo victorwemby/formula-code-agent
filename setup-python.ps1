@@ -20,7 +20,13 @@ if (-not (Test-Path (Join-Path $envPath 'Scripts\\python.exe'))) {
 
 $envPython = Join-Path $envPath 'Scripts\\python.exe'
 $sitePackages = Join-Path $envPath 'Lib\\site-packages'
-$localPackages = Join-Path $PSScriptRoot '.python-packages'
+$localPackagesV2 = Join-Path $PSScriptRoot '.python-packages-v2'
+$localPackagesLegacy = Join-Path $PSScriptRoot '.python-packages'
+$localPackages = if (Test-Path (Join-Path $localPackagesV2 'numpy\\exceptions.py')) {
+    $localPackagesV2
+} else {
+    $localPackagesLegacy
+}
 
 # The project ships a dependency cache for offline or restricted deployments.
 # Copying it into the virtual environment is deterministic and avoids making

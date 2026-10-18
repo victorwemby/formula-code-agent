@@ -29,6 +29,17 @@ function validateTargetLibrary(code, targetLibrary) {
   if (targetLibrary === "纯 Python" && (hasSympy || hasNumpy || hasScipy)) {
     errors.push("目标库已选择纯 Python，代码不能导入 SymPy、NumPy 或 SciPy");
   }
+
+  // Catch the common model mistake of importing a module under an alias and
+  // then referring to the original module name (for example `import sympy as
+  // sp` followed by `sympy.oo`). This would otherwise pass syntax checks and
+  // fail only during execution with NameError.
+  if (/\bsympy\s*\./.test(code) && !/\bimport\s+sympy\b(?!\s+as\s+)/.test(code)) {
+    errors.push("代码使用了 sympy.*，但没有以 sympy 原名导入；请统一使用 sp.* 或改为 import sympy");
+  }
+  if (/\bnp\s*\./.test(code) && !/\bimport\s+numpy\s+as\s+np\b/.test(code)) {
+    errors.push("代码使用了 np.*，但没有执行 import numpy as np");
+  }
   return errors;
 }
 

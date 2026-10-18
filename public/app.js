@@ -23,7 +23,6 @@ const els = {
   removeImage: document.querySelector("#removeImage"),
   promptRow: document.querySelector("#promptRow"),
   promptInput: document.querySelector("#promptInput"),
-  librarySelect: document.querySelector("#librarySelect"),
   sendButton: document.querySelector("#sendButton"),
   clearButton: document.querySelector("#clearButton"),
   newChatButton: document.querySelector("#newChatButton"),
@@ -113,7 +112,7 @@ function persistConversation() {
     sessionStorage.setItem("formula-code-agent-session", JSON.stringify({
       sessionId: state.sessionId,
       currentFormula: state.currentFormula,
-      targetLibrary: els.librarySelect.value,
+      targetLibrary: "auto",
     }));
   } else {
     sessionStorage.removeItem("formula-code-agent-session");
@@ -126,7 +125,6 @@ function restoreConversation() {
     if (!saved?.sessionId || !saved?.currentFormula) return;
     state.sessionId = saved.sessionId;
     state.currentFormula = saved.currentFormula;
-    if (saved.targetLibrary) els.librarySelect.value = saved.targetLibrary;
     els.promptInput.value = "输入任何数学或代码问题";
     updateConversationContext();
   } catch {
@@ -381,7 +379,7 @@ async function sendRequest() {
   const payload = {
     inputType: state.mode,
     prompt,
-    targetLibrary: els.librarySelect.value,
+    targetLibrary: "auto",
     sessionId: state.sessionId,
     quote: state.quote,
   };

@@ -35,8 +35,8 @@ const TOOLS = [
         },
         targetLibrary: {
           type: "string",
-          enum: ["SymPy", "NumPy", "纯 Python"],
-          description: "生成代码的目标库，默认为 SymPy。",
+          enum: ["auto", "SymPy", "NumPy", "纯 Python"],
+          description: "生成代码的目标库；默认由 Agent 根据公式自动决策。",
         },
         image: {
           type: "object",

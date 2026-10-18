@@ -1,166 +1,151 @@
 # Formula Code Agent
 
-一个可运行的 AI Agent 原型：接收数学公式图片或 LaTeX 源码，通过“识别 → 解析 → 生成 → 静态检查 → 受限执行 → 自动修正”的流程返回 Python 代码。
+A locally hosted AI agent that converts formula images or LaTeX into Python code and supports follow-up conversations about mathematics. It recognizes formulas, selects a computation strategy, generates code, validates it, executes it when appropriate, checks supported mathematical results, and requests corrections when validation fails.
 
-## 当前能力
+## Current features
 
-- 图片上传、拖拽、预览与大小校验
-- LaTeX 源码直接输入
-- 自然语言转换要求
-- SymPy、NumPy、纯 Python 三种目标
-- 对话式结果、LaTeX 回显、置信度、依赖和 Agent 执行轨迹
-- 代码复制与 `.py` 下载
-- 生成后实际运行 Python：独立临时目录、隔离模式、5 秒超时、输出大小限制和库白名单
-- 静态检查或执行失败时，将错误反馈给代码模型并自动修正一次、再次验证
-- 可插拔 Provider；当前默认启用 Mock Provider
-- Chrome / Edge 浏览器扩展：侧边栏、选区悬浮按钮和右键转换
+- Formula image upload, drag and drop, preview, and file size checks.
+- Direct LaTeX input and natural-language conversations.
+- Automatic selection of SymPy, NumPy/SciPy, or standard-library Python.
+- Symbolic, numerical, and hybrid strategies, with execution skipped for certain complex symbolic formulas.
+- Session context, follow-up questions, and quoted code or messages.
+- Formula display, confidence, dependencies, warnings, computation decisions, validation results, and execution traces.
+- Code copying and `.py` downloads in the web interface.
+- Static checks, restricted execution, supported mathematical result checks, and automatic correction attempts.
+- Mock and Ollama providers, a Chrome/Edge extension, and an MCP tool.
 
-> Mock Provider 会让 LaTeX 输入走真实的结构化流程并生成通用 SymPy 解析代码；图片输入使用演示公式。它只用于在开源模型选型前验证完整产品交互。
+The mock provider uses a demonstration formula for images and predefined implementations for some formulas. For other formulas, it preserves the LaTeX source and returns a library-specific starter example rather than a complete mathematical implementation. It exercises the workflow without real image recognition. The current application interface and much of its task routing use Chinese.
 
-## 运行
+## Demonstration
 
-需要 Node.js 18 或更高版本，无需安装第三方依赖。
+> **Please refer to the demonstration images in the project's `demonstration image` folder.**
 
-Windows 下可以直接运行（脚本会自动寻找系统或 Codex 自带的 Node.js）：
+## Quick start
+
+Install Node.js 18 or later. No third-party npm dependencies or frontend build are currently required. From the project root:
 
 ```powershell
-.\start.ps1
-```
-
-也可以使用 npm：
-
-```bash
 npm start
 ```
 
-打开 <http://127.0.0.1:4173>。
+Open [http://127.0.0.1:4173](http://127.0.0.1:4173). The provider defaults to `mock` unless `AI_PROVIDER` is already set. Windows users can also run `.\start.ps1`; install Node.js on `PATH` because its bundled-runtime fallback is machine-specific.
 
-### 配置 Python 执行环境
+### Python execution
 
-要启用“实际执行并自动修正”功能，需要 Python 3.11 或更高版本。在项目根目录运行一次：
+Python 3.11 or later is recommended. On Windows, run:
 
 ```powershell
-.\\setup-python.ps1
+.\setup-python.ps1
 ```
 
-脚本会在项目中创建 `.python-env`，并安装 SymPy、NumPy、SciPy 和 LaTeX 解析依赖。没有该环境时，网站仍会生成和静态检查代码，但会提示未实际执行。
+The script creates `.python-env`, tries an available local dependency cache, and falls back to pip when its dependency check fails. Required packages include SymPy, NumPy, SciPy, and the ANTLR LaTeX parser runtime.
 
-## 浏览器扩展
+Use `PYTHON_EXECUTABLE` to select another prepared interpreter. The web interface and chat can start without Python, but conversions requiring execution can fail when the interpreter or dependencies are missing.
 
-网页版会继续保留。浏览器扩展位于 `browser-extension`，它复用同一个本地 Agent 后端。
+### Local models with Ollama
 
-安装步骤：
+Install and start [Ollama](https://ollama.com), then run:
 
-1. 启动本项目后端。
-2. Chrome 打开 `chrome://extensions`，Edge 打开 `edge://extensions`。
-3. 开启开发者模式，点击“加载已解压的扩展程序”。
-4. 选择项目中的 `browser-extension` 文件夹。
+```powershell
+ollama pull qwen2.5vl:7b
+ollama pull qwen2.5-coder:7b
+.\start-ollama.ps1
+```
 
-详细使用说明参见 `browser-extension/README.md`。
+The vision model recognizes formula images; the code model handles conversation, generation, and corrections. Provider settings can also be changed from the web interface.
 
-## MCP 工具
+Manual startup with custom settings:
 
-项目已提供标准输入输出模式的 MCP Server，注册的工具名为 `formula_agent`。它复用网页使用的同一个 `FormulaAgent`，支持 LaTeX、公式图片、自然语言对话、代码生成、纠错、执行和会话上下文。
+```powershell
+$env:AI_PROVIDER = 'open-source'
+$env:OLLAMA_BASE_URL = 'http://127.0.0.1:11434'
+$env:VISION_MODEL = 'qwen2.5vl:7b'
+$env:CODE_MODEL = 'qwen2.5-coder:7b'
+$env:MODEL_TIMEOUT_MS = '120000'
+node server.js
+```
 
-直接启动：
+## Browser extension
+
+1. Start the local web backend.
+2. Open `chrome://extensions` or `edge://extensions`.
+3. Enable **Developer mode** and choose **Load unpacked**.
+4. Select the `browser-extension` folder.
+
+The extension shares the backend provider and defaults to `http://127.0.0.1:4173`. See the [extension guide](browser-extension/README.md).
+
+## MCP integration
+
+The stdio MCP server reuses `FormulaAgent` through the `formula_agent` tool. It supports formulas, conversation, generation, validation, execution, corrections, and session context independently of the HTTP server.
 
 ```powershell
 npm run mcp
 ```
 
-MCP 客户端配置示例见 `mcp-config.example.json`。示例同时注册了 `formula-code-agent`（本地 Ollama 真实模型）和 `formula-code-agent-mock`（演示模型），二者互不替换。重启客户端后即可分别调用两套服务中的 `formula_agent`。调用时复用返回结果中的 `session.id`，即可继续同一公式的对话。
+Use [mcp-config.example.json](mcp-config.example.json) as a client configuration example, replacing its absolute paths with your own. It registers `formula-code-agent` for Ollama and `formula-code-agent-mock` for demonstrations. Restart the MCP client after updating its configuration.
 
-运行测试：
+Reuse the returned `session.id` as `sessionId` for follow-up messages. MCP clients can request `targetLibrary: "auto"`, `"SymPy"`, or `"NumPy"`; the standard-library option retains its existing Chinese API identifier. HTTP conversion always uses automatic library selection.
 
-```bash
-npm test
+## HTTP API
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/health` | Return service status and provider configuration |
+| `POST /api/config` | Switch mock/Ollama providers at runtime |
+| `POST /api/convert` | Submit a formula or conversation message |
+
+Example request to `POST /api/convert` with `Content-Type: application/json`:
+
+```json
+{
+  "inputType": "latex",
+  "latex": "\\frac{x^2 + 1}{2}"
+}
 ```
 
-部署自检（检查项目 Python 依赖和本地 Ollama）：
+Omitting `prompt` for LaTeX or image input uses the built-in conversion instruction. An optional `prompt` supplies a request, `sessionId` continues a session, and `quote: { "text": "..." }` provides quoted context. For images, use `inputType: "image"` and an `image` object with a `data:image/...` URL in `dataUrl`. For conversation, use `inputType: "chat"` with a nonempty `prompt`.
 
-```bash
+Conversion responses include the formula, code, dependencies, warnings, confidence, provider, computation strategy, correction log, execution results, mathematical verification, trace, and session metadata. Chat responses contain an `answer`.
+
+Independent mathematical result checks currently cover supported quadratic-formula implementations. Other formulas can receive a `structural` verification status and still require manual mathematical review; successful execution alone does not establish mathematical correctness.
+
+## Architecture
+
+```text
+Web interface / extension     MCP client
+           |                     |
+    POST /api/convert     stdio formula_agent
+           |                     |
+           +---- FormulaAgent ---+
+                       |
+              Normalize and classify
+                       |
+               Recognize formula
+                       |
+          Chat or select computation strategy
+                       |
+           Generate Python / apply template
+                       |
+           Static checks and corrections
+                       |
+        Restricted execution when appropriate
+                       |
+        Supported mathematical verification
+                       |
+                Structured result
+```
+
+`src/agent/` contains orchestration, sessions, strategies, templates, validation, execution, and verification. `src/providers/` contains mock and Ollama integrations. Provider methods include `recognizeFormula`, `generatePython`, `chat`, and `revisePython`.
+
+## Tests and deployment
+
+```powershell
+npm test
 npm run verify
 ```
 
-## 架构
+The deployment check probes Python dependencies and the Ollama model-list endpoint. It reports failure if either check fails, even when mock web mode remains usable.
 
-```text
-浏览器 UI
-  └─ POST /api/convert
-       └─ FormulaAgent
-            ├─ validateAndNormalize()
-            ├─ recognizeFormula()
-            ├─ generatePython()
-            └─ reviewCode()
-                 └─ Provider（Mock / 开源模型）
-```
+See the [deployment guide](deployment%20instrcutions.md) for configuration, troubleshooting, and production requirements.
 
-`FormulaAgent` 负责任务编排和统一输出；`Provider` 负责具体模型调用。更换模型不会影响前端接口。
-
-## 接入开源模型
-
-项目已内置 Ollama Provider。安装 Ollama 后，先下载一个视觉模型和一个代码模型：
-
-```powershell
-ollama pull qwen2.5vl:7b
-ollama pull qwen2.5-coder:7b
-```
-
-然后在项目根目录运行：
-
-```powershell
-.\start-ollama.ps1
-```
-
-启动成功后，页面右上角会从 `MOCK MODE` 变为 `MODEL ONLINE`。默认模型名称可通过环境变量调整：
-
-```powershell
-$env:VISION_MODEL = "qwen2.5vl:7b"
-$env:CODE_MODEL = "qwen2.5-coder:7b"
-.\start-ollama.ps1
-```
-
-Ollama 默认服务地址为 `http://127.0.0.1:11434`，也可用 `OLLAMA_BASE_URL` 覆盖。
-
-Provider 的核心接口如下：
-
-```js
-async recognizeFormula(image) {
-  // 返回 { latex, confidence, warnings }
-}
-
-async generatePython(context) {
-  // 返回 { code, explanation, dependencies }
-}
-```
-
-也可以手动启动：
-
-```powershell
-$env:AI_PROVIDER="open-source"
-$env:VISION_MODEL="qwen2.5vl:7b"
-$env:CODE_MODEL="qwen2.5-coder:7b"
-node server.js
-```
-
-建议的开源组件：
-
-- 公式 OCR：Pix2Text、LaTeX-OCR、Qwen2.5-VL、InternVL
-- 代码模型：Qwen2.5-Coder、DeepSeek-Coder
-- 本地推理服务：Ollama、vLLM
-
-生产环境建议把视觉识别和代码生成拆成两个 Provider，并增加鉴权、持久化、限流和 Python 沙箱执行。
-
-## API 示例
-
-```json
-POST /api/convert
-{
-  "inputType": "latex",
-  "latex": "\\frac{x^2 + 1}{2}",
-  "prompt": "转换成 Python，并添加中文注释",
-  "targetLibrary": "SymPy"
-}
-```
-
-服务会返回识别公式、Python 代码、依赖、警告、置信度、Provider 信息和 Agent 执行轨迹。
+The executor uses a temporary directory, import restrictions, a five-second timeout, and capped captured output. These controls are not a security sandbox. Public deployment requires authentication and stronger execution isolation as described in the guide.

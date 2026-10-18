@@ -25,7 +25,6 @@ const els = {
   imageMeta: document.querySelector("#imageMeta"),
   removeImageButton: document.querySelector("#removeImageButton"),
   promptInput: document.querySelector("#promptInput"),
-  librarySelect: document.querySelector("#librarySelect"),
   convertButton: document.querySelector("#convertButton"),
   resultSection: document.querySelector("#resultSection"),
   emptyState: document.querySelector("#emptyState"),
@@ -146,7 +145,7 @@ async function convertFormula() {
   const payload = {
     inputType: state.mode,
     prompt: els.promptInput.value.trim(),
-    targetLibrary: els.librarySelect.value,
+    targetLibrary: "auto",
   };
 
   if (state.mode === "latex") {
